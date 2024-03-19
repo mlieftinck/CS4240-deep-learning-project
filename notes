@@ -1,0 +1,6 @@
+Notes from original source code:
+
+src/lib/utils.py
+- Model_L3 -> 3DUNet
+- Model_L2 -> NSN
+- Model_L4 -> NDN
