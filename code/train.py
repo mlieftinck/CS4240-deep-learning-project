@@ -2,6 +2,7 @@ import torch
 
 
 def train(data, labels, net, optimizer, criterion):
+    losses = []
     for i in range(len(data)):
         inp = data[i]
         truth = labels[i]
@@ -11,6 +12,9 @@ def train(data, labels, net, optimizer, criterion):
         loss = criterion(output, truth)
         loss.backward()
         optimizer.step()
+
+        losses.append(loss)
+    return losses
 
 
 def dice_loss(output, ground_truth):

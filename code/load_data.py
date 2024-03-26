@@ -3,13 +3,9 @@ import os
 
 from PIL import Image, ImageSequence
 import numpy as np
-from scipy.interpolate import CubicSpline
 import torch
 import matplotlib.pyplot as plt
 import plotly.express as px
-import holoviews as hv
-
-hv.extension('plotly')
 
 
 def try_gpu():
@@ -50,7 +46,6 @@ def preprocessing():
         array_lab = np.array(lab)
         array_of_image.append(array_img)
         array_of_truth.append(array_lab)
-        # print(i, array_img.min(), array_img.max(), array_lab.min(), array_lab.max())
 
     array_of_image = np.array(array_of_image, dtype=float)
     array_of_image_tensor = torch.tensor(array_of_image)
@@ -66,38 +61,16 @@ def preprocessing():
     array_of_image_tensor_interpolated = torch.nn.functional.interpolate(array_of_image_tensor, size=(112, 114, 112),
                                                                          mode='trilinear')
     array_of_truth_tensor_interpolated = torch.nn.functional.interpolate(array_of_truth_tensor, size=(112, 114, 112),
-                                                                         mode='nearest')
+                                                                         mode='nearest') / 255
 
     print(array_of_image_tensor_interpolated.size())
     print(array_of_truth_tensor_interpolated.size())
 
-    z_holder = []  # empty list for list of points in z direction
-    interpolated_image_loop = np.empty(
-        [112, 114, 112])  # Empty list to append final bicubically interpolated version of image
-
-    for i in range(112):  # loop in x direction
-        for j in range(114):  # loop in y direction
-            for k in range(51):  # loop in z direction
-                z_holder.append(array_of_image[k][j][i])  # (z, y, x)
-
-                if len(z_holder) == 51:
-                    # make spline of the original 51 points, then interpolate to produce 112 points
-                    spl = CubicSpline(np.arange(0, 51), z_holder)
-                    new_z_length = np.linspace(0, 51, 112)
-                    interpolated_z = spl(new_z_length)
-
-                    interpolated_image_loop[i, j, :] = interpolated_z
-
-                    z_holder = []  # empty list for list of points in z direction
-
-    # Normalize the values based on I = (I - I_min) / (I_max - I_min)
-    interpolated_image_normalized_loop = (interpolated_image_loop - np.min(interpolated_image_loop)) / (
-        (np.max(interpolated_image_loop) - np.min(interpolated_image_loop)))
     interpolated_image_normalized_torch = (array_of_image_tensor_interpolated - torch.min(
         array_of_image_tensor_interpolated)) / ((
             torch.max(array_of_image_tensor_interpolated) - torch.min(array_of_image_tensor_interpolated)))
 
-    return interpolated_image_normalized_torch, interpolated_image_normalized_loop
+    return interpolated_image_normalized_torch, array_of_truth_tensor_interpolated
 
 
 def plot(image):
@@ -129,5 +102,7 @@ def plot(image):
 if __name__ == "__main__":
     device = try_gpu()
     print(device)
-    interpolated_image_normalized_torch, interpolated_image_normalized_loop = preprocessing()
+    pic, truth = preprocessing()
+    print(pic.size())
+    print(truth.size())
     # plot(interpolated_image_normalized_torch)
