@@ -3,13 +3,21 @@ from PIL import Image, ImageSequence
 import numpy as np
 from scipy.interpolate import CubicSpline
 import torch
-import torch.nn as nn
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import plotly.express as px
 import holoviews as hv
 hv.extension('plotly')
 
+def try_gpu():
+    """
+    If GPU is available, return torch.device as cuda:0; else return torch.device
+    as cpu.
+    """
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+    return device
 
 def preprocessing():
     #Upload images from training folder
@@ -101,5 +109,7 @@ def plot(image):
     fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
     plt.show()
 
+device = try_gpu()
+print(device)
 interpolated_image_normalized_torch, interpolated_image_normalized_loop = preprocessing()
-plot(interpolated_image_normalized_torch)
+# plot(interpolated_image_normalized_torch)
