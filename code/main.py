@@ -1,5 +1,5 @@
 import torch
-from train import train
+from train import train, test
 from model import nsn
 import torch.nn as nn
 from load_data import preprocessing
@@ -7,13 +7,13 @@ from load_data import preprocessing
 
 if __name__ == "__main__":
     image, labels = preprocessing()
+    print(f'------------ RUNNING ------------')
     image = torch.unsqueeze(image, 0)
-    # image = torch.zeros((1, 1, 1, 112, 114, 112))
-    # labels = torch.zeros((1, 1, 112, 114, 112))
     image = image.float()
     labels = labels.long()
     net = nsn()
     optimizer = torch.optim.SGD(net.parameters(), lr=5e-1)
     criterion = nn.CrossEntropyLoss()
-    l = train(image, labels, net, optimizer, criterion)
-    print(l)
+    train_loss, train_acc = train(image, labels, net, optimizer, criterion)
+    test_loss, test_acc = test(image, labels, net, criterion)
+    print(f'test loss: {test_loss}, test accuracy = {test_acc}')

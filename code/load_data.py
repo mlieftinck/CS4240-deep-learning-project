@@ -63,9 +63,6 @@ def preprocessing():
     array_of_truth_tensor_interpolated = torch.nn.functional.interpolate(array_of_truth_tensor, size=(112, 114, 112),
                                                                          mode='nearest') / 255
 
-    print(array_of_image_tensor_interpolated.size())
-    print(array_of_truth_tensor_interpolated.size())
-
     interpolated_image_normalized_torch = (array_of_image_tensor_interpolated - torch.min(
         array_of_image_tensor_interpolated)) / ((
             torch.max(array_of_image_tensor_interpolated) - torch.min(array_of_image_tensor_interpolated)))
@@ -103,6 +100,4 @@ if __name__ == "__main__":
     device = try_gpu()
     print(device)
     pic, truth = preprocessing()
-    print(pic.size())
-    print(truth.size())
     # plot(interpolated_image_normalized_torch)
