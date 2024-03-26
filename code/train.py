@@ -49,7 +49,7 @@ def test(test_data, test_labels, net, criterion):
             total += lab.flatten().size(0)
             correct += (predicted == lab).sum().item()
 
-        return avg_loss / len(test_data), 100 * correct / total
+        return avg_loss / len(test_data), 100 * correct / total, predicted
 
 
 def dice_loss(output, ground_truth):
