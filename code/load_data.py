@@ -58,7 +58,7 @@ def preprocessing():
                                                                          mode='trilinear')
 
         array_of_image_tensor_interpolated = torch.squeeze(array_of_image_tensor_interpolated, 0)
-        array_of_image_tensor_interpolated = torch.squeeze(array_of_image_tensor_interpolated, 0)
+        # array_of_image_tensor_interpolated = torch.squeeze(array_of_image_tensor_interpolated, 0)
 
         interpolated_image_normalized_torch = (array_of_image_tensor_interpolated - torch.min(
             array_of_image_tensor_interpolated)) / ((torch.max(array_of_image_tensor_interpolated) -
