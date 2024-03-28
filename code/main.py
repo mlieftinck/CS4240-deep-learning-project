@@ -8,20 +8,19 @@ from loss import DiceLoss
 
 
 if __name__ == "__main__":
-    images, labels = preprocessing()
+    images, labels = preprocessing("NDN")
     print(f'------------ RUNNING ------------')
-    # Try for only a single timeseries
-    image = images[0]
 
-    image = torch.unsqueeze(image, 0)
-    image = image.float()
+    # images = torch.unsqueeze(images, 0)
+    images = images.float()
     labels = labels.long()
     net = ndn()
     optimizer = torch.optim.SGD(net.parameters(), lr=5e-1)
     criterion = nn.CrossEntropyLoss()
     # criterion = DiceLoss()
-    train_loss, train_acc = train(image, labels, net, optimizer, criterion)
-    test_loss, test_acc, output_array = test(image, labels, net, criterion)
+    train_loss, train_acc = train(images, labels, net, optimizer, criterion)
+    test_loss, test_acc, output_array = test(images, labels, net, criterion)
     print(output_array.size())
     print(f'test loss: {test_loss}, test accuracy = {test_acc}')
     view_image(output_array.cpu().detach().numpy()[0])
+    # view_image(labels[0].cpu().detach().numpy()[0])

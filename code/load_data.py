@@ -7,6 +7,7 @@ import torch
 import matplotlib.pyplot as plt
 import plotly.express as px
 
+
 def try_gpu():
     """
     If GPU is available, return torch.device as cuda:0; else return torch.device
@@ -18,11 +19,12 @@ def try_gpu():
         device = torch.device('cpu')
     return device
 
-def preprocessing():
+
+def preprocessing(model="NSN"):
     # Upload images from training folder
     project_dir = os.path.dirname(os.getcwd())
     file_dir_train = project_dir + '/data/input/train/'
-    file_dir_test = project_dir + '/data/labels/train/NSN/'
+    file_dir_test = project_dir + '/data/labels/train/' + model + '/'
 
     batch_of_images = []
     batch_of_truths = []
@@ -53,9 +55,9 @@ def preprocessing():
         array_of_image_tensor = torch.unsqueeze(array_of_image_tensor, 0)
         array_of_image_tensor = torch.unsqueeze(array_of_image_tensor, 0)
 
-        array_of_image_tensor_interpolated = torch.nn.functional.interpolate(array_of_image_tensor, size=(112, 114, 112),
-                                                                         mode='trilinear')
-
+        array_of_image_tensor_interpolated = torch.nn.functional.interpolate(array_of_image_tensor,
+                                                                             size=(112, 114, 112),
+                                                                             mode='trilinear')
 
         reflection_pad_3d = torch.nn.ReflectionPad3d((8, 8, 7, 7, 8, 8))
         array_of_image_tensor_interpolated_padded = reflection_pad_3d(array_of_image_tensor_interpolated)
@@ -63,7 +65,7 @@ def preprocessing():
 
         interpolated_image_normalized_torch = (array_of_image_tensor_interpolated_padded - torch.min(
             array_of_image_tensor_interpolated_padded)) / ((torch.max(array_of_image_tensor_interpolated_padded) -
-                                                     torch.min(array_of_image_tensor_interpolated_padded)))
+                                                            torch.min(array_of_image_tensor_interpolated_padded)))
 
         batch_of_images.append(interpolated_image_normalized_torch)
 
@@ -112,6 +114,7 @@ def preprocessing():
 
     return epochs_of_images, epochs_of_truths
 
+
 def plot(image):
     # Now we still need to pad the image with 64 voxels... huh?????
     x = np.linspace(0, 112, 112)
@@ -136,6 +139,7 @@ def plot(image):
     sctt = ax.scatter3D(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
     fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
     plt.show()
+
 
 if __name__ == "__main__":
     device = try_gpu()
