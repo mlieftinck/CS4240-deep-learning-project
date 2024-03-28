@@ -56,12 +56,13 @@ def preprocessing():
         array_of_image_tensor_interpolated = torch.nn.functional.interpolate(array_of_image_tensor, size=(112, 114, 112),
                                                                          mode='trilinear')
 
-        array_of_image_tensor_interpolated = torch.squeeze(array_of_image_tensor_interpolated, 0)
-        # array_of_image_tensor_interpolated = torch.squeeze(array_of_image_tensor_interpolated, 0)
+        reflection_pad_3d = torch.nn.ReflectionPad3d((8, 8, 7, 7, 8, 8))
+        array_of_image_tensor_interpolated_padded = reflection_pad_3d(array_of_image_tensor_interpolated)
+        array_of_image_tensor_interpolated_padded = torch.squeeze(array_of_image_tensor_interpolated_padded, 0)
 
-        interpolated_image_normalized_torch = (array_of_image_tensor_interpolated - torch.min(
-            array_of_image_tensor_interpolated)) / ((torch.max(array_of_image_tensor_interpolated) -
-                                                     torch.min(array_of_image_tensor_interpolated)))
+        interpolated_image_normalized_torch = (array_of_image_tensor_interpolated_padded - torch.min(
+            array_of_image_tensor_interpolated_padded)) / ((torch.max(array_of_image_tensor_interpolated_padded) -
+                                                     torch.min(array_of_image_tensor_interpolated_padded)))
 
         batch_of_images.append(interpolated_image_normalized_torch)
 
@@ -95,10 +96,12 @@ def preprocessing():
                                                                              size=(112, 114, 112),
                                                                              mode='nearest') / 255
 
-        array_of_truth_tensor_interpolated = torch.squeeze(array_of_truth_tensor_interpolated, 0)
-        array_of_truth_tensor_interpolated = torch.squeeze(array_of_truth_tensor_interpolated, 0)
+        reflection_pad_3d = torch.nn.ReflectionPad3d((8, 8, 7, 7, 8, 8))
+        array_of_truth_tensor_interpolated_padded = reflection_pad_3d(array_of_truth_tensor_interpolated)
+        array_of_truth_tensor_interpolated_padded = torch.squeeze(array_of_truth_tensor_interpolated_padded, 0)
+        array_of_truth_tensor_interpolated_padded = torch.squeeze(array_of_truth_tensor_interpolated_padded, 0)
 
-        batch_of_truths.append(array_of_truth_tensor_interpolated)
+        batch_of_truths.append(array_of_truth_tensor_interpolated_padded)
 
         if len(batch_of_truths) == 11:
             epochs_of_truths.append(batch_of_truths)
@@ -106,11 +109,6 @@ def preprocessing():
 
     epochs_of_truths = np.array(epochs_of_truths)
     epochs_of_truths = torch.Tensor(epochs_of_truths)
-
-    # info_dict_img = {"Image Size": img.size, "Image Height": img.height, "Image Width": img.width,
-    #                  "Frames in Image": getattr(img, "n_frames", 1)}
-    # info_dict_lab = {"Image Size": lab.size, "Image Height": lab.height, "Image Width": lab.width,
-    #                  "Frames in Image": getattr(lab, "n_frames", 1)}
 
     return epochs_of_images, epochs_of_truths
 
