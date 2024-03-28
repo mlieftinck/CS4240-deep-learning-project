@@ -18,7 +18,6 @@ def try_gpu():
         device = torch.device('cpu')
     return device
 
-
 def preprocessing():
     # Upload images from training folder
     project_dir = os.path.dirname(os.getcwd())
@@ -80,6 +79,7 @@ def preprocessing():
         # Empty list to read pixel values of original image
         array_of_truth = []
 
+        # Append all the pixel values of the image in to one (51, 114, 112) array (z, y, x)
         for i in range(51):
             lab.seek(i)
             array_lab = np.array(lab)
