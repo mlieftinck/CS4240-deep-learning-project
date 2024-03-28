@@ -56,6 +56,7 @@ def preprocessing():
         array_of_image_tensor_interpolated = torch.nn.functional.interpolate(array_of_image_tensor, size=(112, 114, 112),
                                                                          mode='trilinear')
 
+
         reflection_pad_3d = torch.nn.ReflectionPad3d((8, 8, 7, 7, 8, 8))
         array_of_image_tensor_interpolated_padded = reflection_pad_3d(array_of_image_tensor_interpolated)
         array_of_image_tensor_interpolated_padded = torch.squeeze(array_of_image_tensor_interpolated_padded, 0)
@@ -67,7 +68,6 @@ def preprocessing():
         batch_of_images.append(interpolated_image_normalized_torch)
 
         if len(batch_of_images) == 11:
-
             epochs_of_images.append(batch_of_images)
             batch_of_images = []
 
@@ -141,6 +141,4 @@ if __name__ == "__main__":
     device = try_gpu()
     print(device)
     pic, truth = preprocessing()
-    print(pic.size())
-    print(truth.size())
     # plot(interpolated_image_normalized_torch)
