@@ -23,40 +23,56 @@ class ndn(nn.Module):
         super().__init__()
 
         # Single-use layers
+        # CBR, CBR, Pooling
         self.conv1 = nn.Conv3d(input_channels, 12, 5, 1, 5 // 2)
         self.bnorm1 = nn.BatchNorm3d(12)
-
         self.conv2 = nn.Conv3d(12, 24, 5, 1, 5 // 2)
         self.bnorm2 = nn.BatchNorm3d(24)
-
+        # CBR, CBR, Pooling
         self.conv4 = nn.Conv3d(24, 24, 5, 1, 5 // 2)
         self.bnorm4 = nn.BatchNorm3d(24)
-
         self.conv5 = nn.Conv3d(24, 48, 5, 1, 5 // 2)
         self.bnorm5 = nn.BatchNorm3d(48)
-
+        # CBR, CBR, Pooling
         self.conv7 = nn.Conv3d(48, 48, 5, 1, 5 // 2)
         self.bnorm7 = nn.BatchNorm3d(48)
-
         self.conv8 = nn.Conv3d(48, 96, 5, 1, 5 // 2)
         self.bnorm8 = nn.BatchNorm3d(96)
-
+        # CBR, CBR, Pooling
         self.conv10 = nn.Conv3d(96, 96, 5, 1, 5 // 2)
         self.bnorm10 = nn.BatchNorm3d(96)
-
         self.conv11 = nn.Conv3d(96, 192, 5, 1, 5 // 2)
         self.bnorm11 = nn.BatchNorm3d(192)
-
+        # CBR, CBR Deconvolution, Concatenation
         self.conv13 = nn.Conv3d(192, 192, 5, 1, 5 // 2)
         self.bnorm13 = nn.BatchNorm3d(192)
-
         self.conv14 = nn.Conv3d(192, 384, 5, 1, 5 // 2)
         self.bnorm14 = nn.BatchNorm3d(384)
-
         self.dconv15 = nn.ConvTranspose3d(384, 384, 2, 2, 0)
-
-        current_final_channel_number = 48
-        self.conv31 = nn.Conv3d(current_final_channel_number, 2, 1, 1, 0)
+        # CBR, CBR Deconvolution, Concatenation
+        self.conv17 = nn.Conv3d(384, 192, 5, 1, 5 // 2)
+        self.bnorm17 = nn.BatchNorm3d(192)
+        self.conv18 = nn.Conv3d(192, 192, 5, 1, 5 // 2)
+        self.bnorm18 = nn.BatchNorm3d(192)
+        self.dconv19 = nn.ConvTranspose3d(192, 192, 2, 2, 0)
+        # CBR, CBR Deconvolution, Concatenation
+        self.conv21 = nn.Conv3d(192, 96, 5, 1, 5 // 2)
+        self.bnorm21 = nn.BatchNorm3d(96)
+        self.conv22 = nn.Conv3d(96, 96, 5, 1, 5 // 2)
+        self.bnorm22 = nn.BatchNorm3d(96)
+        self.dconv23 = nn.ConvTranspose3d(96, 96, 2, 2, 0)
+        # CBR, CBR Deconvolution, Concatenation
+        self.conv25 = nn.Conv3d(96, 48, 5, 1, 5 // 2)
+        self.bnorm25 = nn.BatchNorm3d(48)
+        self.conv26 = nn.Conv3d(48, 48, 5, 1, 5 // 2)
+        self.bnorm26 = nn.BatchNorm3d(48)
+        self.dconv27 = nn.ConvTranspose3d(48, 48, 2, 2, 0)
+        # CBR, CBR, Convolution
+        self.conv29 = nn.Conv3d(48, 24, 5, 1, 5 // 2)
+        self.bnorm29 = nn.BatchNorm3d(24)
+        self.conv30 = nn.Conv3d(24, 24, 5, 1, 5 // 2)
+        self.bnorm30 = nn.BatchNorm3d(24)
+        self.conv31 = nn.Conv3d(24, 2, 1, 1, 0)
 
         # Multi-use layers
         self.relu = nn.ReLU()
@@ -83,7 +99,24 @@ class ndn(nn.Module):
         cbr14 = self.relu(self.bnorm14(self.conv14(cbr13)))
         dconv15 = self.dconv15(cbr14)
         del cbr13, cbr14, mp12
+        conc16 = dconv15
+        cbr17 = self.relu(self.bnorm17(self.conv13(conc16)))
+        cbr18 = self.relu(self.bnorm18(self.conv14(cbr17)))
+        dconv19 = self.dconv19(cbr18)
+        del cbr17, cbr18, dconv15, conc16
+        conc20 = dconv19
+        cbr21 = self.relu(self.bnorm21(self.conv21(conc20)))
+        cbr22 = self.relu(self.bnorm22(self.conv22(cbr21)))
+        dconv23 = self.dconv23(cbr22)
+        del cbr21, cbr22, dconv19, conc20
+        conc24 = dconv23
+        cbr25 = self.relu(self.bnorm25(self.conv25(conc24)))
+        cbr26 = self.relu(self.bnorm26(self.conv26(cbr25)))
+        dconv27 = self.dconv27(cbr26)
+        del cbr25, cbr26, dconv23, conc24
+        conc28 = dconv27
+        cbr29 = self.relu(self.bnorm29(self.conv25(conc28)))
+        cbr30 = self.relu(self.bnorm30(self.conv30(cbr29)))
+        pred = self.conv31(cbr30)
 
-        pred = self.conv31(dconv15)
-        # test was dconv(cbr5) -> alles zwart...
         return F.softmax(pred, 1)
