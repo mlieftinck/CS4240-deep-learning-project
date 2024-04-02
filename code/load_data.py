@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import plotly.express as px
+from dash import Dash, dcc, html
 
 def try_gpu():
     """
@@ -56,14 +57,15 @@ def preprocessing():
         array_of_image_tensor_interpolated = torch.nn.functional.interpolate(array_of_image_tensor, size=(112, 114, 112),
                                                                          mode='trilinear')
 
-
         reflection_pad_3d = torch.nn.ReflectionPad3d((8, 8, 7, 7, 8, 8))
         array_of_image_tensor_interpolated_padded = reflection_pad_3d(array_of_image_tensor_interpolated)
         array_of_image_tensor_interpolated_padded = torch.squeeze(array_of_image_tensor_interpolated_padded, 0)
 
         interpolated_image_normalized_torch = (array_of_image_tensor_interpolated_padded - torch.min(
             array_of_image_tensor_interpolated_padded)) / ((torch.max(array_of_image_tensor_interpolated_padded) -
-                                                     torch.min(array_of_image_tensor_interpolated_padded)))
+                                                            torch.min(array_of_image_tensor_interpolated_padded)))
+
+        interpolated_image_normalized_torch = torch.squeeze(interpolated_image_normalized_torch, 0)
 
         batch_of_images.append(interpolated_image_normalized_torch)
 
@@ -113,10 +115,9 @@ def preprocessing():
     return epochs_of_images, epochs_of_truths
 
 def plot(image):
-    # Now we still need to pad the image with 64 voxels... huh?????
-    x = np.linspace(0, 112, 112)
-    y = np.linspace(0, 114, 114)
-    z = np.linspace(0, 112, 112)
+    x = np.linspace(0, 128, 128)
+    y = np.linspace(0, 128, 128)
+    z = np.linspace(0, 128, 128)
     X, Y, Z = np.meshgrid(x, y, z)
 
     # Reshape to get a list of coordinates
@@ -129,11 +130,18 @@ def plot(image):
     fig = px.scatter_3d(values.flatten(), x=x_flat, y=y_flat, z=z_flat, color=values.flatten(), opacity=0.2)
     fig.update_traces(marker=dict(size=3))
     fig.show()
-    #
+
+    app = Dash()
+    app.layout = html.Div([
+        dcc.Graph(figure=fig)
+    ])
+
+    app.run_server(debug=True, use_reloader=False)
+
     my_cmap = plt.get_cmap('binary')
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
-    sctt = ax.scatter3D(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
+    sctt = ax.scatter3Dgl(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
     fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
     plt.show()
 
@@ -141,4 +149,6 @@ if __name__ == "__main__":
     device = try_gpu()
     print(device)
     pic, truth = preprocessing()
-    # plot(interpolated_image_normalized_torch)
+    print(pic.size())
+    print(truth.size())
+    # plot(pic[0][0][0])
