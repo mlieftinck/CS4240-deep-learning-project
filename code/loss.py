@@ -6,7 +6,7 @@ class DiceLoss(nn.Module):
         super().__init__()
 
     def forward(self, inputs, labels):
-        input_object_channel = inputs[:, 0, :, :, :]
+        input_object_channel = inputs[:, 1, :, :, :]
         inputs = input_object_channel.reshape(-1)
         labels = labels.reshape(-1)
         dice_coefficient = self.dice(inputs, labels)
