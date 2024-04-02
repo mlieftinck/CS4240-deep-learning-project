@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import plotly.express as px
-from dash import Dash, dcc, html
+# from dash import Dash, dcc, html
 
 def try_gpu():
     """
@@ -65,7 +65,6 @@ def preprocessing():
             array_of_image_tensor_interpolated_padded)) / ((torch.max(array_of_image_tensor_interpolated_padded) -
                                                             torch.min(array_of_image_tensor_interpolated_padded)))
 
-        interpolated_image_normalized_torch = torch.squeeze(interpolated_image_normalized_torch, 0)
 
         batch_of_images.append(interpolated_image_normalized_torch)
 
@@ -114,36 +113,37 @@ def preprocessing():
 
     return epochs_of_images, epochs_of_truths
 
-def plot(image):
-    x = np.linspace(0, 128, 128)
-    y = np.linspace(0, 128, 128)
-    z = np.linspace(0, 128, 128)
-    X, Y, Z = np.meshgrid(x, y, z)
 
-    # Reshape to get a list of coordinates
-    x_flat = X.flatten()
-    y_flat = Y.flatten()
-    z_flat = Z.flatten()
-
-    values = image
-
-    fig = px.scatter_3d(values.flatten(), x=x_flat, y=y_flat, z=z_flat, color=values.flatten(), opacity=0.2)
-    fig.update_traces(marker=dict(size=3))
-    fig.show()
-
-    app = Dash()
-    app.layout = html.Div([
-        dcc.Graph(figure=fig)
-    ])
-
-    app.run_server(debug=True, use_reloader=False)
-
-    my_cmap = plt.get_cmap('binary')
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    sctt = ax.scatter3Dgl(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
-    fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
-    plt.show()
+# def plot(image):
+#     x = np.linspace(0, 128, 128)
+#     y = np.linspace(0, 128, 128)
+#     z = np.linspace(0, 128, 128)
+#     X, Y, Z = np.meshgrid(x, y, z)
+#
+#     # Reshape to get a list of coordinates
+#     x_flat = X.flatten()
+#     y_flat = Y.flatten()
+#     z_flat = Z.flatten()
+#
+#     values = image
+#
+#     fig = px.scatter_3d(values.flatten(), x=x_flat, y=y_flat, z=z_flat, color=values.flatten(), opacity=0.2)
+#     fig.update_traces(marker=dict(size=3))
+#     fig.show()
+#
+#     app = Dash()
+#     app.layout = html.Div([
+#         dcc.Graph(figure=fig)
+#     ])
+#
+#     app.run_server(debug=True, use_reloader=False)
+#
+#     my_cmap = plt.get_cmap('binary')
+#     fig = plt.figure()
+#     ax = fig.add_subplot(projection='3d')
+#     sctt = ax.scatter3Dgl(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
+#     fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
+#     plt.show()
 
 if __name__ == "__main__":
     device = try_gpu()
