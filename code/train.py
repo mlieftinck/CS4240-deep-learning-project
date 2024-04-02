@@ -6,7 +6,9 @@ def train(data, labels, net, optimizer, criterion):
     avg_loss = 0
     correct = 0
     total = 0
+    data_len = len(data)
     for i in range(len(data)):
+        print(f'{i} from {data_len}')
         # get batch
         inp = data[i]
         truth = labels[i]
