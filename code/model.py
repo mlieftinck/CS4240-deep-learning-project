@@ -92,7 +92,7 @@ class ndn(nn.Module):
         mp9 = self.pool(cbr8)
         del cbr7, cbr8, mp6
         cbr10 = self.relu(self.bnorm10(self.conv10(mp9)))
-        cbr11 = self.relu(self.bnorm10(self.conv11(cbr10)))
+        cbr11 = self.relu(self.bnorm11(self.conv11(cbr10)))
         mp12 = self.pool(cbr11)
         del cbr10, cbr11, mp9
         cbr13 = self.relu(self.bnorm13(self.conv13(mp12)))
@@ -100,8 +100,8 @@ class ndn(nn.Module):
         dconv15 = self.dconv15(cbr14)
         del cbr13, cbr14, mp12
         conc16 = dconv15
-        cbr17 = self.relu(self.bnorm17(self.conv13(conc16)))
-        cbr18 = self.relu(self.bnorm18(self.conv14(cbr17)))
+        cbr17 = self.relu(self.bnorm17(self.conv17(conc16)))
+        cbr18 = self.relu(self.bnorm18(self.conv18(cbr17)))
         dconv19 = self.dconv19(cbr18)
         del cbr17, cbr18, dconv15, conc16
         conc20 = dconv19
@@ -115,7 +115,7 @@ class ndn(nn.Module):
         dconv27 = self.dconv27(cbr26)
         del cbr25, cbr26, dconv23, conc24
         conc28 = dconv27
-        cbr29 = self.relu(self.bnorm29(self.conv25(conc28)))
+        cbr29 = self.relu(self.bnorm29(self.conv29(conc28)))
         cbr30 = self.relu(self.bnorm30(self.conv30(cbr29)))
         pred = self.conv31(cbr30)
 
