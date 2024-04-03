@@ -39,7 +39,6 @@ class nsn(nn.Module):
 
         self.last_conv = nn.Conv3d(64, 2, 1, 1, 0)
 
-
     def forward(self, x):
         h = self.relu1(self.batchnorm1(self.cov1(x)))
         h = self.relu2(self.batchnorm2(self.cov2(h)))
@@ -157,3 +156,27 @@ class ndn(nn.Module):
         pred = self.conv31(cbr30)
 
         return F.softmax(pred, 1)
+
+
+class mini_ndn(nn.Module):
+    def __init__(self, input_channels=1):
+        super().__init__()
+
+        # Single-use layers
+        # CBR, CBR, Pooling
+        self.conv1 = nn.Conv3d(input_channels, 12, 5, 1, 5 // 2)
+        self.bnorm1 = nn.BatchNorm3d(12)
+        self.conv2 = nn.Conv3d(12, 24, 5, 1, 5 // 2)
+        self.bnorm2 = nn.BatchNorm3d(24)
+        self.pool3 = nn.MaxPool3d(2, 2)
+        self.dconv4 = nn.ConvTranspose3d(384, 384, 2, 2, 0)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        # CBR, CBR, Pooling, Deconvolution
+        cbr1 = self.relu(self.bnorm1(self.conv1(x)))
+        cbr2 = self.relu(self.bnorm2(self.conv2(cbr1)))
+        mp3 = self.pool3(cbr2)
+        dconv4 = self.dconv4(mp3)
+
+        return F.softmax(dconv4, 1)
