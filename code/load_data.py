@@ -21,9 +21,8 @@ def try_gpu():
     return device
 
 
-def preprocessing(model="NSN"):
+def preprocessing(model="NSN", project_dir):
     # Upload images from training folder
-    project_dir = os.path.dirname(os.getcwd())
     file_dir_train = project_dir + '/data/input/train/'
     file_dir_test = project_dir + '/data/labels/train/' + model + '/'
 

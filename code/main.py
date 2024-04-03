@@ -9,11 +9,11 @@ import time
 import os
 
 
-def run_training(model="NSN", save=False):
+def run_training(model="NSN", save=False, project_dir):
     NDN = False
     if model == "NDN":
         NDN = True
-    images, labels = preprocessing(model)
+    images, labels = preprocessing(model, project_dir)
     print(f'------------ RUNNING ------------')
     images = images.float()
     labels = labels.long()
@@ -55,5 +55,5 @@ def load_trained_model(model, model_name):
 
 
 if __name__ == "__main__":
-    o = run_training()
+    o = run_training(project_dir=os.getcwd())
     view_image(o[0])
