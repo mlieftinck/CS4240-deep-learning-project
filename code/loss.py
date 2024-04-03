@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class DiceLoss(nn.Module):
@@ -13,6 +14,6 @@ class DiceLoss(nn.Module):
         return 1 - dice_coefficient
 
     def dice(self, inputs, labels, epsilon=1e-6):
-        intersect = inputs*labels
-        union = inputs+labels
+        # intersect = inputs * labels
+        # union = inputs + labels
         return 2.0 * (inputs * labels).sum() / ((inputs + labels).sum() + epsilon)
