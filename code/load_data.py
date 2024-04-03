@@ -157,47 +157,9 @@ def preprocessing(project_dir, model="QCANet"):
 
     return epochs_of_images, epochs_of_truths
 
-# def plot(image):
-#     x = np.linspace(0, 128, 128)
-#     y = np.linspace(0, 128, 128)
-#     z = np.linspace(0, 128, 128)
-#     X, Y, Z = np.meshgrid(x, y, z)
-#
-#     # Reshape to get a list of coordinates
-#     x_flat = X.flatten()
-#     y_flat = Y.flatten()
-#     z_flat = Z.flatten()
-#
-#     values = image
-#     values = values.flatten()
-#
-#     x_flat = x_flat[:-10000]
-#     y_flat = y_flat[:-10000]
-#     z_flat = z_flat[:-10000]
-#     values = values[:-10000]
-#
-#     fig = px.scatter_3d(values.flatten(), x=x_flat, y=y_flat, z=z_flat, color=values, opacity=0.2)
-#     fig.update_traces(marker=dict(size=3))
-#     fig.show()
-#
-#     app = Dash()
-#     app.layout = html.Div([
-#         dcc.Graph(figure=fig)
-#     ])
-#
-#     app.run_server(debug=True, use_reloader=False)
-
-    # my_cmap = plt.get_cmap('binary')
-    # fig = plt.figure()
-    # ax = fig.add_subplot(projection='3d')
-    # sctt = ax.scatter3Dgl(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
-    # fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
-    # plt.show()
-
 if __name__ == "__main__":
     device = try_gpu()
     print(device)
     pic, truth = preprocessing(os.getcwd(), model="QCANet")
     print(pic.size())
     print(truth.size())
-    # plot(truth[0][0])
