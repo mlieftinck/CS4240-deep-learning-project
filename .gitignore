@@ -1,0 +1,4 @@
+/data/preprocessed_data/epochs_of_images.pt
+/data/preprocessed_data/epochs_of_truths_NDN.pt
+/data/preprocessed_data/epochs_of_truths_NSN.pt
+/data/preprocessed_data/epochs_of_truths_QCANet.pt

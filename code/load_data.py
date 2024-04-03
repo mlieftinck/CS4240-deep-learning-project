@@ -6,8 +6,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import plotly.express as px
-# from dash import Dash, dcc, html
-
+from dash import Dash, dcc, html
 
 def try_gpu():
     """
@@ -20,11 +19,12 @@ def try_gpu():
         device = torch.device('cpu')
     return device
 
+def preprocessing(project_dir, model="QCANet"):
+    os.chdir('..')
 
-def preprocessing(project_dir, model="NSN"):
     # Upload images from training folder
-    file_dir_train = project_dir + '/data/input/train/'
-    file_dir_test = project_dir + '/data/labels/train/' + model + '/'
+    file_dir_train = os.getcwd() + '/data/input/train/'
+    file_dir_test = os.getcwd() + '/data/labels/train/' + model + '/'
 
     batch_of_images = []
     batch_of_truths = []
@@ -70,13 +70,33 @@ def preprocessing(project_dir, model="NSN"):
         batch_of_images.append(interpolated_image_normalized_torch)
 
         if len(batch_of_images) == 11:
+            image_flipped_x_list = []
+            image_flipped_y_list = []
+            image_flipped_xy_list = []
+
+            for pre_flipped_image in batch_of_images:
+                image_flipped_x = torch.flip(pre_flipped_image, [0])
+                image_flipped_y = torch.flip(pre_flipped_image, [1])
+                image_flipped_xy = torch.flip(image_flipped_x, [1])
+
+                image_flipped_x_list.append(image_flipped_x)
+                image_flipped_y_list.append(image_flipped_y)
+                image_flipped_xy_list.append(image_flipped_xy)
+
             epochs_of_images.append(batch_of_images)
+            epochs_of_images.append(image_flipped_x_list)
+            epochs_of_images.append(image_flipped_y_list)
+            epochs_of_images.append(image_flipped_xy_list)
+
             batch_of_images = []
+            image_flipped_x_list = []
+            image_flipped_y_list = []
+            image_flipped_xy_list = []
 
     epochs_of_images = np.array(epochs_of_images)
     epochs_of_images = torch.Tensor(epochs_of_images)
 
-    for testing_file in os.listdir(file_dir_test):
+    for testing_file in test_directory:
         lab = Image.open(file_dir_test + testing_file)
 
         # Empty list to read pixel values of original image
@@ -106,14 +126,36 @@ def preprocessing(project_dir, model="NSN"):
         batch_of_truths.append(array_of_truth_tensor_interpolated_padded)
 
         if len(batch_of_truths) == 11:
+            image_flipped_x_list = []
+            image_flipped_y_list = []
+            image_flipped_xy_list = []
+
+            for pre_flipped_image in batch_of_truths:
+                image_flipped_x = torch.flip(pre_flipped_image, [0])
+                image_flipped_y = torch.flip(pre_flipped_image, [1])
+                image_flipped_xy = torch.flip(image_flipped_x, [1])
+
+                image_flipped_x_list.append(image_flipped_x)
+                image_flipped_y_list.append(image_flipped_y)
+                image_flipped_xy_list.append(image_flipped_xy)
+
             epochs_of_truths.append(batch_of_truths)
+            epochs_of_truths.append(image_flipped_x_list)
+            epochs_of_truths.append(image_flipped_y_list)
+            epochs_of_truths.append(image_flipped_xy_list)
+
             batch_of_truths = []
+            image_flipped_x_list = []
+            image_flipped_y_list = []
+            image_flipped_xy_list = []
 
     epochs_of_truths = np.array(epochs_of_truths)
     epochs_of_truths = torch.Tensor(epochs_of_truths)
 
-    return epochs_of_images, epochs_of_truths
+    torch.save(epochs_of_images, '/data/preprocessed_data/epochs_of_images.pt')
+    torch.save(epochs_of_truths, '/Users/aman/Desktop/TUDelft Year 5/Deep Learning/Project/CS4240-deep-learning-project/data/preprocessed_data/epochs_of_truths_'+ model +'.pt')
 
+    return epochs_of_images, epochs_of_truths
 
 # def plot(image):
 #     x = np.linspace(0, 128, 128)
@@ -127,8 +169,14 @@ def preprocessing(project_dir, model="NSN"):
 #     z_flat = Z.flatten()
 #
 #     values = image
+#     values = values.flatten()
 #
-#     fig = px.scatter_3d(values.flatten(), x=x_flat, y=y_flat, z=z_flat, color=values.flatten(), opacity=0.2)
+#     x_flat = x_flat[:-10000]
+#     y_flat = y_flat[:-10000]
+#     z_flat = z_flat[:-10000]
+#     values = values[:-10000]
+#
+#     fig = px.scatter_3d(values.flatten(), x=x_flat, y=y_flat, z=z_flat, color=values, opacity=0.2)
 #     fig.update_traces(marker=dict(size=3))
 #     fig.show()
 #
@@ -138,19 +186,18 @@ def preprocessing(project_dir, model="NSN"):
 #     ])
 #
 #     app.run_server(debug=True, use_reloader=False)
-#
-#     my_cmap = plt.get_cmap('binary')
-#     fig = plt.figure()
-#     ax = fig.add_subplot(projection='3d')
-#     sctt = ax.scatter3Dgl(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
-#     fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
-#     plt.show()
 
+    # my_cmap = plt.get_cmap('binary')
+    # fig = plt.figure()
+    # ax = fig.add_subplot(projection='3d')
+    # sctt = ax.scatter3Dgl(x_flat, y_flat, z_flat, s=0.1, c=values.flatten(), cmap=my_cmap, alpha=0.2)
+    # fig.colorbar(sctt, ax=ax, shrink=0.5, aspect=5)
+    # plt.show()
 
 if __name__ == "__main__":
     device = try_gpu()
     print(device)
-    pic, truth = preprocessing(os.getcwd())
+    pic, truth = preprocessing(os.getcwd(), model="QCANet")
     print(pic.size())
     print(truth.size())
-    # plot(pic[0][0][0])
+    # plot(truth[0][0])
