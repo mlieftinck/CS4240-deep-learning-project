@@ -21,7 +21,7 @@ def try_gpu():
     return device
 
 
-def preprocessing(model="NSN", project_dir):
+def preprocessing(project_dir, model="NSN"):
     # Upload images from training folder
     file_dir_train = project_dir + '/data/input/train/'
     file_dir_test = project_dir + '/data/labels/train/' + model + '/'
@@ -150,7 +150,7 @@ def preprocessing(model="NSN", project_dir):
 if __name__ == "__main__":
     device = try_gpu()
     print(device)
-    pic, truth = preprocessing()
+    pic, truth = preprocessing(os.getcwd())
     print(pic.size())
     print(truth.size())
     # plot(pic[0][0][0])
