@@ -37,19 +37,46 @@ class nsn(nn.Module):
         self.deconv1 = nn.ConvTranspose3d(128, 128, 2, 2, 0)
         self.relu7 = nn.ReLU()
 
-        self.last_conv = nn.Conv3d(64, 2, 1, 1, 0)
+        self.conv7 = nn.Conv3d(192, 64, 3, 1, 1)
+        self.batchnorm7 = nn.BatchNorm3d(64)
+        self.relu8 = nn.ReLU()
+
+        self.conv8 = nn.Conv3d(64, 64, 3, 1, 1)
+        self.batchnorm8 = nn.BatchNorm3d(64)
+        self.relu9 = nn.ReLU()
+
+        self.deconv2 = nn.ConvTranspose3d(64, 64, 2, 2, 0)
+        self.relu10 = nn.ReLU()
+
+        self.conv9 = nn.Conv3d(64, 32, 3, 1, 1)
+        self.batchnorm9 = nn.BatchNorm3d(32)
+        self.relu11 = nn.ReLU()
+
+        self.conv10 = nn.Conv3d(32, 32, 3, 1, 1)
+        self.batchnorm10 = nn.BatchNorm3d(32)
+        self.relu11 = nn.ReLU()
+
+        self.last_conv = nn.Conv3d(32, 2, 1, 1, 0)
 
     def forward(self, x):
         h = self.relu1(self.batchnorm1(self.cov1(x)))
-        h = self.relu2(self.batchnorm2(self.cov2(h)))
-        # h = self.max_pool1(h)
+        out_layer_2 = self.relu2(self.batchnorm2(self.cov2(h)))
+        h = self.max_pool1(out_layer_2)
         h = self.relu3(self.batchnorm3(self.cov3(h)))
-        h = self.relu4(self.batchnorm4(self.cov4(h)))
-        # h = self.max_pool1(h)
-        # h = self.relu5(self.batchnorm5(self.cov3(h)))
-        # h = self.relu6(self.batchnorm6(self.cov4(h)))
-        # h = self.relu7(self.deconv1(h)))
-
+        out_layer_4 = self.relu4(self.batchnorm4(self.cov4(h)))
+        h = self.max_pool1(out_layer_4)
+        h = self.relu5(self.batchnorm5(self.cov3(h)))
+        h = self.relu6(self.batchnorm6(self.cov4(h)))
+        h = self.relu7(self.deconv1(h))
+        h = torch.cat([out_layer_4, h], 1)
+        del out_layer_4
+        h = self.relu8(self.batchnorm7(self.conv7(h)))
+        h = self.relu9(self.batchnorm8(self.conv8(h)))
+        h = self.relu10(self.deconv2(h))
+        h = torch.cat([out_layer_2, h], 1)
+        del out_layer_2
+        h = self.relu11(self.batchnorm9(self.conv9(h)))
+        h = self.relu12(self.batchnorm10(self.conv10(h)))
         h = self.last_conv(h)
         return F.softmax(h, 1)
 
