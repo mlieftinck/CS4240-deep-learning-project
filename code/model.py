@@ -68,12 +68,12 @@ class nsn(nn.Module):
         h = self.relu5(self.batchnorm5(self.cov3(h)))
         h = self.relu6(self.batchnorm6(self.cov4(h)))
         h = self.relu7(self.deconv1(h))
-        h = torch.concat([out_layer_4, h], 1)
+        h = torch.cat([out_layer_4, h], 1)
         del out_layer_4
         h = self.relu8(self.batchnorm7(self.conv7(h)))
         h = self.relu9(self.batchnorm8(self.conv8(h)))
         h = self.relu10(self.deconv2(h))
-        h = torch.concat([out_layer_2, h], 1)
+        h = torch.cat([out_layer_2, h], 1)
         del out_layer_2
         h = self.relu11(self.batchnorm9(self.conv9(h)))
         h = self.relu12(self.batchnorm10(self.conv10(h)))
