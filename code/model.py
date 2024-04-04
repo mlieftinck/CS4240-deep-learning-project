@@ -65,8 +65,8 @@ class nsn(nn.Module):
         h = self.relu3(self.batchnorm3(self.cov3(h)))
         out_layer_4 = self.relu4(self.batchnorm4(self.cov4(h)))
         h = self.max_pool2(out_layer_4)
-        h = self.relu5(self.batchnorm5(self.cov3(h)))
-        h = self.relu6(self.batchnorm6(self.cov4(h)))
+        h = self.relu5(self.batchnorm5(self.cov5(h)))
+        h = self.relu6(self.batchnorm6(self.cov6(h)))
         h = self.relu7(self.deconv1(h))
         h = torch.cat([out_layer_4, h], 1)
         del out_layer_4
