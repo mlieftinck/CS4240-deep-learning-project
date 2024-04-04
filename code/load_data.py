@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import plotly.express as px
-from dash import Dash, dcc, html
 
 def try_gpu():
     """
@@ -20,11 +19,9 @@ def try_gpu():
     return device
 
 def preprocessing(project_dir, model="QCANet"):
-    os.chdir('..')
-
     # Upload images from training folder
-    file_dir_train = os.getcwd() + '/data/input/train/'
-    file_dir_test = os.getcwd() + '/data/labels/train/' + model + '/'
+    file_dir_train = project_dir + '/data/input/train/'
+    file_dir_test = project_dir + '/data/labels/train/' + model + '/'
 
     batch_of_images = []
     batch_of_truths = []

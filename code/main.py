@@ -7,6 +7,7 @@ from view_images import view_image
 from loss import DiceLoss
 import time
 import os
+from memory_profiler import profile
 
 
 def run_training(project_dir, model="NSN", save=False):
