@@ -27,7 +27,7 @@ class nsn(nn.Module):
         self.max_pool2 = nn.MaxPool3d(2, 2)
 
         self.cov5 = nn.Conv3d(64, 64, 3, 1, 1)
-        self.batchnorm5 = nn.BatchNorm3d(32)
+        self.batchnorm5 = nn.BatchNorm3d(64)
         self.relu5 = nn.ReLU()
 
         self.cov6 = nn.Conv3d(64, 128, 3, 1, 1)
@@ -64,7 +64,7 @@ class nsn(nn.Module):
         h = self.max_pool1(out_layer_2)
         h = self.relu3(self.batchnorm3(self.cov3(h)))
         out_layer_4 = self.relu4(self.batchnorm4(self.cov4(h)))
-        h = self.max_pool1(out_layer_4)
+        h = self.max_pool2(out_layer_4)
         h = self.relu5(self.batchnorm5(self.cov3(h)))
         h = self.relu6(self.batchnorm6(self.cov4(h)))
         h = self.relu7(self.deconv1(h))
