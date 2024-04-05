@@ -54,7 +54,7 @@ class nsn(nn.Module):
 
         self.conv10 = nn.Conv3d(32, 32, 3, 1, 1)
         self.batchnorm10 = nn.BatchNorm3d(32)
-        self.relu11 = nn.ReLU()
+        self.relu12 = nn.ReLU()
 
         self.last_conv = nn.Conv3d(32, 2, 1, 1, 0)
 
