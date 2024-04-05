@@ -54,18 +54,28 @@ def load_trained_model(model, model_name):
     model.load_state_dict(torch.load(parent_dir + '/trained_models/' + model_name))
 
 
+def load_processed_data(path):
+    project_dir = os.path.dirname(os.getcwd())
+    return torch.load(os.path.join(project_dir, path), map_location=torch.device("cpu"))
+
+
 def run_training_mini_ndn():
-    images, labels = preprocessing(os.getcwd(), "NDN")
+    batches = 3
+    timeseries_full = load_processed_data("preprocessed_data/input/train.pt")
+    labels_full = load_processed_data("preprocessed_data/labels/train/NDN.pt")
+    timeseries = timeseries_full[:batches]
+    labels = labels_full[:batches]
+    del timeseries_full, labels_full
     print(f'------------ RUNNING ------------')
-    images = images.float()
+    timeseries = timeseries.float()
     labels = labels.long()
     net = mini_ndn()
     optimizer = torch.optim.Adam(net.parameters(), lr=5e-1)
     criterion = DiceLoss()
 
     time_start = time.time()
-    train_loss, train_acc = train(images, labels, net, optimizer, criterion)
-    test_loss, test_acc, output_array = test(images, labels, net, criterion)
+    train_loss, train_acc = train(timeseries, labels, net, optimizer, criterion)
+    test_loss, test_acc, output_array = test(timeseries, labels, net, criterion)
     time_end = time.time() - time_start
 
     print(output_array.size())
@@ -79,5 +89,6 @@ def run_training_mini_ndn():
 
 
 if __name__ == "__main__":
-    o = run_training(os.getcwd())
+    # o = run_training(os.getcwd())
+    o = run_training_mini_ndn()
     view_image(o[0])
