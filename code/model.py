@@ -48,7 +48,7 @@ class nsn(nn.Module):
         self.deconv2 = nn.ConvTranspose3d(64, 64, 2, 2, 0)
         self.relu10 = nn.ReLU()
 
-        self.conv9 = nn.Conv3d(64, 32, 3, 1, 1)
+        self.conv9 = nn.Conv3d(96, 32, 3, 1, 1)
         self.batchnorm9 = nn.BatchNorm3d(32)
         self.relu11 = nn.ReLU()
 
