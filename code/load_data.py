@@ -19,23 +19,33 @@ def try_gpu():
         device = torch.device('cpu')
     return device
 
-def preprocessing(project_dir, model="QCANet"):
+def preprocessing(project_dir, model):
     os.chdir('..')
 
     # Upload images from training folder
     file_dir_train = os.getcwd() + '/data/input/train/'
-    file_dir_test = os.getcwd() + '/data/labels/train/' + model + '/'
+    file_dir_label = os.getcwd() + '/data/labels/train/' + model + '/'
+    file_dir_test = os.getcwd() + '/data/input/test/'
+    file_dir_test_label = os.getcwd() + '/data/labels/test/QCANet/'
 
     batch_of_images = []
     batch_of_truths = []
+    batch_of_test_images = []
+    batch_of_test_labels = []
 
     epochs_of_images = []
     epochs_of_truths = []
+    epochs_of_test_images = []
+    epochs_of_test_labels = []
 
     train_directory = os.listdir(file_dir_train)
     train_directory.sort()
+    label_directory = os.listdir(file_dir_label)
+    label_directory.sort()
     test_directory = os.listdir(file_dir_test)
     test_directory.sort()
+    test_label_directory = os.listdir(file_dir_test_label)
+    test_label_directory.sort()
 
     for training_file in train_directory:
         img = Image.open(file_dir_train + training_file)
@@ -96,8 +106,8 @@ def preprocessing(project_dir, model="QCANet"):
     epochs_of_images = np.array(epochs_of_images)
     epochs_of_images = torch.Tensor(epochs_of_images)
 
-    for testing_file in test_directory:
-        lab = Image.open(file_dir_test + testing_file)
+    for label_file in label_directory:
+        lab = Image.open(file_dir_label + label_file)
 
         # Empty list to read pixel values of original image
         array_of_truth = []
@@ -152,14 +162,89 @@ def preprocessing(project_dir, model="QCANet"):
     epochs_of_truths = np.array(epochs_of_truths)
     epochs_of_truths = torch.Tensor(epochs_of_truths)
 
-    torch.save(epochs_of_images, '/data/preprocessed_data/epochs_of_images.pt')
-    torch.save(epochs_of_truths, '/Users/aman/Desktop/TUDelft Year 5/Deep Learning/Project/CS4240-deep-learning-project/data/preprocessed_data/epochs_of_truths_'+ model +'.pt')
+    for test_file in test_directory:
+        lab = Image.open(file_dir_test + test_file)
 
-    return epochs_of_images, epochs_of_truths
+        # Empty list to read pixel values of original image
+        array_of_test = []
+
+        # Append all the pixel values of the image in to one (51, 114, 112) array (z, y, x)
+        for i in range(51):
+            lab.seek(i)
+            array_lab = np.array(lab)
+            array_of_test.append(array_lab)
+
+        array_of_test = np.array(array_of_test, dtype=float)
+        array_of_test_tensor = torch.tensor(array_of_test)
+
+        array_of_test_tensor = torch.unsqueeze(array_of_test_tensor, 0)
+        array_of_test_tensor = torch.unsqueeze(array_of_test_tensor, 0)
+
+        array_of_truth_tensor_interpolated = torch.nn.functional.interpolate(array_of_test_tensor,
+                                                                             size=(112, 114, 112),
+                                                                             mode='nearest') / 255
+
+        reflection_pad_3d = torch.nn.ReflectionPad3d((8, 8, 7, 7, 8, 8))
+        array_of_test_tensor_interpolated_padded = reflection_pad_3d(array_of_truth_tensor_interpolated)
+        array_of_test_tensor_interpolated_padded = torch.squeeze(array_of_test_tensor_interpolated_padded, 0)
+
+        batch_of_test_images.append(array_of_test_tensor_interpolated_padded)
+
+        if len(batch_of_test_images) == 11:
+            epochs_of_test_images.append(batch_of_test_images)
+            batch_of_test_images = []
+
+    epochs_of_test_images = np.array(epochs_of_test_images)
+    epochs_of_test_images = torch.Tensor(epochs_of_test_images)
+
+    for test_label_file in test_label_directory:
+        lab = Image.open(file_dir_test_label + test_label_file)
+
+        # Empty list to read pixel values of original image
+        array_of_test_labels = []
+
+        # Append all the pixel values of the image in to one (51, 114, 112) array (z, y, x)
+        for i in range(51):
+            lab.seek(i)
+            array_lab = np.array(lab)
+            array_of_test_labels.append(array_lab)
+
+        array_of_test_labels = np.array(array_of_test_labels, dtype=float)
+        array_of_test_labels_tensor = torch.tensor(array_of_test_labels)
+
+        array_of_test_labels_tensor = torch.unsqueeze(array_of_test_labels_tensor, 0)
+        array_of_test_labels_tensor = torch.unsqueeze(array_of_test_labels_tensor, 0)
+
+        array_of_test_labels_tensor_interpolated = torch.nn.functional.interpolate(array_of_test_labels_tensor,
+                                                                             size=(112, 114, 112),
+                                                                             mode='nearest') / 255
+
+        reflection_pad_3d = torch.nn.ReflectionPad3d((8, 8, 7, 7, 8, 8))
+        array_of_test_labels_tensor_interpolated_padded = reflection_pad_3d(array_of_test_labels_tensor_interpolated)
+        array_of_test_labels_tensor_interpolated_padded = torch.squeeze(array_of_test_labels_tensor_interpolated_padded, 0)
+        array_of_test_labels_tensor_interpolated_padded = torch.squeeze(array_of_test_labels_tensor_interpolated_padded, 0)
+
+        batch_of_test_labels.append(array_of_test_labels_tensor_interpolated_padded)
+
+        if len(batch_of_test_labels) == 11:
+            epochs_of_test_labels.append(batch_of_test_labels)
+            batch_of_test_labels = []
+
+    epochs_of_test_labels = np.array(epochs_of_test_labels)
+    epochs_of_test_labels = torch.Tensor(epochs_of_test_labels)
+
+    torch.save(epochs_of_images, '/Users/aman/Desktop/TUDelft Year 5/Deep Learning/Project/CS4240-deep-learning-project/data/preprocessed_data/epochs_of_images.pt')
+    torch.save(epochs_of_truths, '/Users/aman/Desktop/TUDelft Year 5/Deep Learning/Project/CS4240-deep-learning-project/data/preprocessed_data/epochs_of_truths_'+ model +'.pt')
+    torch.save(epochs_of_test_images, '/Users/aman/Desktop/TUDelft Year 5/Deep Learning/Project/CS4240-deep-learning-project/data/preprocessed_data/epochs_of_test_images.pt')
+    torch.save(epochs_of_test_labels, '/Users/aman/Desktop/TUDelft Year 5/Deep Learning/Project/CS4240-deep-learning-project/data/preprocessed_data/epochs_of_test_image_labels.pt')
+
+    return epochs_of_images, epochs_of_truths, epochs_of_test_images, epochs_of_test_labels
 
 if __name__ == "__main__":
     device = try_gpu()
     print(device)
-    pic, truth = preprocessing(os.getcwd(), model="QCANet")
+    pic, truth, test, test_labels = preprocessing(os.getcwd(), model="QCANet")
     print(pic.size())
     print(truth.size())
+    print(test.size())
+    print(test_labels.size())
