@@ -26,8 +26,9 @@ def preprocessing(source_folder="data/input/train"):
     # Upload images from data folder
     data_path = os.path.join(project_dir, source_folder)
 
+    image_batches = []
     image_timeseries = []
-    batches = []
+    timeseries_batches = []
 
     data_dir = os.listdir(data_path)
     data_dir.sort()
@@ -78,17 +79,32 @@ def preprocessing(source_folder="data/input/train"):
                 image_timeseries_flipped_y.append(image_flipped_y)
                 image_timeseries_flipped_xy.append(image_flipped_xy)
 
-            batches.append(image_timeseries)
-            batches.append(image_timeseries_flipped_x)
-            batches.append(image_timeseries_flipped_y)
-            batches.append(image_timeseries_flipped_xy)
+            timeseries_batches.append(image_timeseries)
+            timeseries_batches.append(image_timeseries_flipped_x)
+            timeseries_batches.append(image_timeseries_flipped_y)
+            timeseries_batches.append(image_timeseries_flipped_xy)
             image_timeseries = []
 
-    batches = np.array(batches)
-    batches = torch.Tensor(batches)
+    timeseries_batches = np.array(timeseries_batches)
+    timeseries_batches = torch.Tensor(timeseries_batches)
+
+    for i in range(len(timeseries_batches)):
+        for j in range(len(timeseries_batches[i])):
+            if i < len(timeseries_batches) // 4:
+                torch.save(timeseries_batches[i][j],
+                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + ".pt")
+            elif i < 2 * len(timeseries_batches) // 4:
+                torch.save(timeseries_batches[i][j],
+                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + "_flip_x.pt")
+            elif i < 3 * len(timeseries_batches) // 4:
+                torch.save(timeseries_batches[i][j],
+                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + "_flip_y.pt")
+            else:
+                torch.save(timeseries_batches[i][j],
+                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + "_flip_xy.pt")
 
     # os.makedirs(project_dir + "/preprocessed_data/" + source_folder[4:] + "/", exist_ok=True)
-    torch.save(batches, project_dir + "/preprocessed_data" + source_folder[4:] + ".pt")
+    # torch.save(timeseries_batches, project_dir + "/preprocessed_data" + source_folder[4:] + ".pt")
 
     return time.time() - start_time
 
