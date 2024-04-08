@@ -213,14 +213,19 @@ class mini_ndn(nn.Module):
         self.conv2 = nn.Conv3d(12, 24, 5, 1, 5 // 2)
         self.bnorm2 = nn.BatchNorm3d(24)
         self.pool3 = nn.MaxPool3d(2, 2)
-        self.dconv4 = nn.ConvTranspose3d(384, 384, 2, 2, 0)
+        self.dconv4 = nn.ConvTranspose3d(24, 24, 2, 2, 0)
+        self.conv5 = nn.Conv3d(24, 2, 1, 1, 0)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         # CBR, CBR, Pooling, Deconvolution
         cbr1 = self.relu(self.bnorm1(self.conv1(x)))
         cbr2 = self.relu(self.bnorm2(self.conv2(cbr1)))
+        del cbr1
         mp3 = self.pool3(cbr2)
+        del cbr2
         dconv4 = self.dconv4(mp3)
+        del mp3
+        pred = self.conv5(dconv4)
 
-        return F.softmax(dconv4, 1)
+        return F.softmax(pred, 1)
