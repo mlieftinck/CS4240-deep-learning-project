@@ -26,10 +26,6 @@ def preprocessing(source_folder="data/input/train"):
     # Upload images from data folder
     data_path = os.path.join(project_dir, source_folder)
 
-    image_batches = []
-    image_timeseries = []
-    timeseries_batches = []
-
     data_dir = os.listdir(data_path)
     data_dir.sort()
 
@@ -62,49 +58,18 @@ def preprocessing(source_folder="data/input/train"):
         image_tensor_normalized = (image_tensor_interpolated_padded - torch.min(
             image_tensor_interpolated_padded)) / ((torch.max(image_tensor_interpolated_padded) -
                                                    torch.min(image_tensor_interpolated_padded)))
+        image_flipped_x = torch.flip(image_tensor_normalized, [0])
+        image_flipped_y = torch.flip(image_tensor_normalized, [1])
+        image_flipped_xy = torch.flip(image_flipped_x, [1])
 
-        image_timeseries.append(image_tensor_normalized)
-
-        if len(image_timeseries) == images_per_timeseries:
-            image_timeseries_flipped_x = []
-            image_timeseries_flipped_y = []
-            image_timeseries_flipped_xy = []
-
-            for pre_flipped_image in image_timeseries:
-                image_flipped_x = torch.flip(pre_flipped_image, [0])
-                image_flipped_y = torch.flip(pre_flipped_image, [1])
-                image_flipped_xy = torch.flip(image_flipped_x, [1])
-
-                image_timeseries_flipped_x.append(image_flipped_x)
-                image_timeseries_flipped_y.append(image_flipped_y)
-                image_timeseries_flipped_xy.append(image_flipped_xy)
-
-            timeseries_batches.append(image_timeseries)
-            timeseries_batches.append(image_timeseries_flipped_x)
-            timeseries_batches.append(image_timeseries_flipped_y)
-            timeseries_batches.append(image_timeseries_flipped_xy)
-            image_timeseries = []
-
-    timeseries_batches = np.array(timeseries_batches)
-    timeseries_batches = torch.Tensor(timeseries_batches)
-
-    for i in range(len(timeseries_batches)):
-        for j in range(len(timeseries_batches[i])):
-            if i < len(timeseries_batches) // 4:
-                torch.save(timeseries_batches[i][j],
-                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + ".pt")
-            elif i < 2 * len(timeseries_batches) // 4:
-                torch.save(timeseries_batches[i][j],
-                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + "_flip_x.pt")
-            elif i < 3 * len(timeseries_batches) // 4:
-                torch.save(timeseries_batches[i][j],
-                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + "_flip_y.pt")
-            else:
-                torch.save(timeseries_batches[i][j],
-                           project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + data_dir[i] + "_flip_xy.pt")
-
-    # os.makedirs(project_dir + "/preprocessed_data/" + source_folder[4:] + "/", exist_ok=True)
-    # torch.save(timeseries_batches, project_dir + "/preprocessed_data" + source_folder[4:] + ".pt")
+        torch.save(image_tensor_normalized,
+                   project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + file[:-4] + ".pt")
+        torch.save(image_flipped_x,
+                   project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + file[:-4] + "_flip_x.pt")
+        torch.save(image_flipped_y,
+                   project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + file[:-4] + "_flip_y.pt")
+        torch.save(image_flipped_xy,
+                   project_dir + "/preprocessed_data2" + source_folder[4:] + "/" + file[:-4] + "_flip_xy.pt")
 
     return time.time() - start_time
 
