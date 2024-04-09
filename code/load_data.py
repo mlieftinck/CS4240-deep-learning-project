@@ -230,7 +230,7 @@ def preprocessing(project_dir, model):
 if __name__ == "__main__":
     device = try_gpu()
     print(device)
-    pic, truth, test, test_labels = preprocessing(os.getcwd(), model="QCANet")
+    pic, truth, test, test_labels = preprocessing(os.getcwd(), model="NDN")
 
     print(pic.size())
     print(truth.size())
