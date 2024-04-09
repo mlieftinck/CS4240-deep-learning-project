@@ -2,16 +2,19 @@ import torch
 import numpy
 
 
-def train(data, labels, net, optimizer, criterion):
+def train(data, labels, net, optimizer, criterion, device):
     avg_loss = 0
     correct = 0
     total = 0
     data_len = len(data)
-    for i in range(len(data)):
-        print(f'{i} from {data_len}')
+    for i in range(data_len):
         # get batch
         inp = data[i]
         truth = labels[i]
+
+        # to GPU
+        inp = inp.to(device)
+        truth = truth.to(device)
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -25,8 +28,10 @@ def train(data, labels, net, optimizer, criterion):
         # keep track of loss and accuracy
         avg_loss += loss
         _, predicted = torch.max(output.data, 1)
-        total += labels.flatten().size(0)
-        correct += (predicted == labels).sum().item()
+        total += truth.flatten().size(0)
+        correct += (predicted == truth).sum().item()
+
+        del inp, truth, predicted
 
     return avg_loss / len(data), 100 * correct / total
 

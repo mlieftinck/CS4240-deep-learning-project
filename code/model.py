@@ -27,7 +27,7 @@ class nsn(nn.Module):
         self.max_pool2 = nn.MaxPool3d(2, 2)
 
         self.cov5 = nn.Conv3d(64, 64, 3, 1, 1)
-        self.batchnorm5 = nn.BatchNorm3d(32)
+        self.batchnorm5 = nn.BatchNorm3d(64)
         self.relu5 = nn.ReLU()
 
         self.cov6 = nn.Conv3d(64, 128, 3, 1, 1)
@@ -37,19 +37,46 @@ class nsn(nn.Module):
         self.deconv1 = nn.ConvTranspose3d(128, 128, 2, 2, 0)
         self.relu7 = nn.ReLU()
 
-        self.last_conv = nn.Conv3d(64, 2, 1, 1, 0)
+        self.conv7 = nn.Conv3d(192, 64, 3, 1, 1)
+        self.batchnorm7 = nn.BatchNorm3d(64)
+        self.relu8 = nn.ReLU()
+
+        self.conv8 = nn.Conv3d(64, 64, 3, 1, 1)
+        self.batchnorm8 = nn.BatchNorm3d(64)
+        self.relu9 = nn.ReLU()
+
+        self.deconv2 = nn.ConvTranspose3d(64, 64, 2, 2, 0)
+        self.relu10 = nn.ReLU()
+
+        self.conv9 = nn.Conv3d(96, 32, 3, 1, 1)
+        self.batchnorm9 = nn.BatchNorm3d(32)
+        self.relu11 = nn.ReLU()
+
+        self.conv10 = nn.Conv3d(32, 32, 3, 1, 1)
+        self.batchnorm10 = nn.BatchNorm3d(32)
+        self.relu12 = nn.ReLU()
+
+        self.last_conv = nn.Conv3d(32, 2, 1, 1, 0)
 
     def forward(self, x):
         h = self.relu1(self.batchnorm1(self.cov1(x)))
-        h = self.relu2(self.batchnorm2(self.cov2(h)))
-        # h = self.max_pool1(h)
+        out_layer_2 = self.relu2(self.batchnorm2(self.cov2(h)))
+        h = self.max_pool1(out_layer_2)
         h = self.relu3(self.batchnorm3(self.cov3(h)))
-        h = self.relu4(self.batchnorm4(self.cov4(h)))
-        # h = self.max_pool1(h)
-        # h = self.relu5(self.batchnorm5(self.cov3(h)))
-        # h = self.relu6(self.batchnorm6(self.cov4(h)))
-        # h = self.relu7(self.deconv1(h)))
-
+        out_layer_4 = self.relu4(self.batchnorm4(self.cov4(h)))
+        h = self.max_pool2(out_layer_4)
+        h = self.relu5(self.batchnorm5(self.cov5(h)))
+        h = self.relu6(self.batchnorm6(self.cov6(h)))
+        h = self.relu7(self.deconv1(h))
+        h = torch.cat([out_layer_4, h], 1)
+        del out_layer_4
+        h = self.relu8(self.batchnorm7(self.conv7(h)))
+        h = self.relu9(self.batchnorm8(self.conv8(h)))
+        h = self.relu10(self.deconv2(h))
+        h = torch.cat([out_layer_2, h], 1)
+        del out_layer_2
+        h = self.relu11(self.batchnorm9(self.conv9(h)))
+        h = self.relu12(self.batchnorm10(self.conv10(h)))
         h = self.last_conv(h)
         return F.softmax(h, 1)
 
@@ -86,25 +113,25 @@ class ndn(nn.Module):
         self.bnorm14 = nn.BatchNorm3d(384)
         self.dconv15 = nn.ConvTranspose3d(384, 384, 2, 2, 0)
         # CBR, CBR Deconvolution, Concatenation
-        self.conv17 = nn.Conv3d(384, 192, 5, 1, 5 // 2)
+        self.conv17 = nn.Conv3d(576, 192, 5, 1, 5 // 2)
         self.bnorm17 = nn.BatchNorm3d(192)
         self.conv18 = nn.Conv3d(192, 192, 5, 1, 5 // 2)
         self.bnorm18 = nn.BatchNorm3d(192)
         self.dconv19 = nn.ConvTranspose3d(192, 192, 2, 2, 0)
         # CBR, CBR Deconvolution, Concatenation
-        self.conv21 = nn.Conv3d(192, 96, 5, 1, 5 // 2)
+        self.conv21 = nn.Conv3d(288, 96, 5, 1, 5 // 2)
         self.bnorm21 = nn.BatchNorm3d(96)
         self.conv22 = nn.Conv3d(96, 96, 5, 1, 5 // 2)
         self.bnorm22 = nn.BatchNorm3d(96)
         self.dconv23 = nn.ConvTranspose3d(96, 96, 2, 2, 0)
         # CBR, CBR Deconvolution, Concatenation
-        self.conv25 = nn.Conv3d(96, 48, 5, 1, 5 // 2)
+        self.conv25 = nn.Conv3d(144, 48, 5, 1, 5 // 2)
         self.bnorm25 = nn.BatchNorm3d(48)
         self.conv26 = nn.Conv3d(48, 48, 5, 1, 5 // 2)
         self.bnorm26 = nn.BatchNorm3d(48)
         self.dconv27 = nn.ConvTranspose3d(48, 48, 2, 2, 0)
         # CBR, CBR, Convolution
-        self.conv29 = nn.Conv3d(48, 24, 5, 1, 5 // 2)
+        self.conv29 = nn.Conv3d(72, 24, 5, 1, 5 // 2)
         self.bnorm29 = nn.BatchNorm3d(24)
         self.conv30 = nn.Conv3d(24, 24, 5, 1, 5 // 2)
         self.bnorm30 = nn.BatchNorm3d(24)
@@ -117,42 +144,59 @@ class ndn(nn.Module):
     def forward(self, x):
         cbr1 = self.relu(self.bnorm1(self.conv1(x)))
         cbr2 = self.relu(self.bnorm2(self.conv2(cbr1)))
+        del cbr1
         mp3 = self.pool(cbr2)
-        del cbr1, cbr2
         cbr4 = self.relu(self.bnorm4(self.conv4(mp3)))
+        del mp3
         cbr5 = self.relu(self.bnorm5(self.conv5(cbr4)))
+        del cbr4
         mp6 = self.pool(cbr5)
-        del cbr4, cbr5, mp3
         cbr7 = self.relu(self.bnorm7(self.conv7(mp6)))
+        del mp6
         cbr8 = self.relu(self.bnorm8(self.conv8(cbr7)))
+        del cbr7
         mp9 = self.pool(cbr8)
-        del cbr7, cbr8, mp6
         cbr10 = self.relu(self.bnorm10(self.conv10(mp9)))
+        del mp9
         cbr11 = self.relu(self.bnorm11(self.conv11(cbr10)))
+        del cbr10
         mp12 = self.pool(cbr11)
-        del cbr10, cbr11, mp9
         cbr13 = self.relu(self.bnorm13(self.conv13(mp12)))
+        del mp12
         cbr14 = self.relu(self.bnorm14(self.conv14(cbr13)))
+        del cbr13
         dconv15 = self.dconv15(cbr14)
-        del cbr13, cbr14, mp12
-        conc16 = dconv15
+        del cbr14
+        conc16 = torch.cat([cbr11, dconv15], dim=1)
+        del cbr11, dconv15
         cbr17 = self.relu(self.bnorm17(self.conv17(conc16)))
+        del conc16
         cbr18 = self.relu(self.bnorm18(self.conv18(cbr17)))
+        del cbr17
         dconv19 = self.dconv19(cbr18)
-        del cbr17, cbr18, dconv15, conc16
-        conc20 = dconv19
+        del cbr18
+        conc20 = torch.cat([cbr8, dconv19], dim=1)
+        del cbr8, dconv19
         cbr21 = self.relu(self.bnorm21(self.conv21(conc20)))
+        del conc20
         cbr22 = self.relu(self.bnorm22(self.conv22(cbr21)))
+        del cbr21
         dconv23 = self.dconv23(cbr22)
-        del cbr21, cbr22, dconv19, conc20
-        conc24 = dconv23
+        del cbr22
+        conc24 = torch.cat([cbr5, dconv23], dim=1)
+        del cbr5, dconv23
         cbr25 = self.relu(self.bnorm25(self.conv25(conc24)))
+        del conc24
         cbr26 = self.relu(self.bnorm26(self.conv26(cbr25)))
+        del cbr25
         dconv27 = self.dconv27(cbr26)
-        del cbr25, cbr26, dconv23, conc24
-        conc28 = dconv27
+        del cbr26
+        conc28 = torch.cat([cbr2, dconv27], dim=1)
+        del cbr2, dconv27
         cbr29 = self.relu(self.bnorm29(self.conv29(conc28)))
+        del conc28
         cbr30 = self.relu(self.bnorm30(self.conv30(cbr29)))
+        del cbr29
         pred = self.conv31(cbr30)
 
         return F.softmax(pred, 1)
@@ -169,14 +213,19 @@ class mini_ndn(nn.Module):
         self.conv2 = nn.Conv3d(12, 24, 5, 1, 5 // 2)
         self.bnorm2 = nn.BatchNorm3d(24)
         self.pool3 = nn.MaxPool3d(2, 2)
-        self.dconv4 = nn.ConvTranspose3d(384, 384, 2, 2, 0)
+        self.dconv4 = nn.ConvTranspose3d(24, 24, 2, 2, 0)
+        self.conv5 = nn.Conv3d(24, 2, 1, 1, 0)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         # CBR, CBR, Pooling, Deconvolution
         cbr1 = self.relu(self.bnorm1(self.conv1(x)))
         cbr2 = self.relu(self.bnorm2(self.conv2(cbr1)))
+        del cbr1
         mp3 = self.pool3(cbr2)
+        del cbr2
         dconv4 = self.dconv4(mp3)
+        del mp3
+        pred = self.conv5(dconv4)
 
-        return F.softmax(dconv4, 1)
+        return F.softmax(pred, 1)

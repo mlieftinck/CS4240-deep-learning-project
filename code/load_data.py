@@ -1,12 +1,8 @@
-# from numba import jit, cuda
 import os
 
 from PIL import Image, ImageSequence
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
-import plotly.express as px
-from dash import Dash, dcc, html
 
 def try_gpu():
     """
