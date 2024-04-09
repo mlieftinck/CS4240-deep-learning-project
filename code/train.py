@@ -12,6 +12,9 @@ def train(data, labels, net, optimizer, criterion, device):
         inp = data[i]
         truth = labels[i]
 
+        inp = torch.unsqueeze(inp, 0)
+        truth = torch.unsqueeze(truth, 0)
+
         # to GPU
         inp = inp.to(device)
         truth = truth.to(device)
@@ -45,6 +48,9 @@ def test(test_data, test_labels, net, criterion):
             # get batch
             inp = test_data[i]
             lab = test_labels[i]
+
+            inp = torch.unsqueeze(inp, 0)
+            lab = torch.unsqueeze(lab, 0)
 
             # only forward pass
             outputs = net(inp)
